@@ -1,11 +1,14 @@
-service: graphql-serverless-example
+org: milafrerichs
+app: mwd3-js-backend
+service: mappingwithd3-backend
 
 provider:
     name: aws
     runtime: nodejs12.x
     stage: dev
+    profile: prototypefund
     environment:
-        ITEM_TABLE: ${self:service}-items-${self:provider.stage}
+        USERS_TABLE: ${self:service}-users-${self:provider.stage}
     iamRoleStatements:
         - Effect: Allow
           Action:
@@ -15,7 +18,7 @@ provider:
               - dynamodb:PutItem
               - dynamodb:UpdateItem
               - dynamodb:DeleteItem
-          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.ITEM_TABLE}"
+          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
 # define a /graphql function
 functions:
     graphql:
@@ -29,20 +32,45 @@ functions:
                   path: graphql
                   method: POST
                   cors: true
-                  
 # create a DynamoDB table
 resources:
     Resources:
-        ItemsTable:
+        LessonTable:
             Type: "AWS::DynamoDB::Table"
             Properties:
                 AttributeDefinitions:
-                    - AttributeName: itemId
+                    - AttributeName: id
                       AttributeType: S
                 KeySchema:
-                    - AttributeName: itemId
+                    - AttributeName: id
                       KeyType: HASH
                 ProvisionedThroughput:
                     ReadCapacityUnits: 1
                     WriteCapacityUnits: 1
-                TableName: ${self:provider.environment.ITEM_TABLE}
+                TableName: ${self:provider.environment.LESSON_TABLE}
+        SavedTable:
+            Type: "AWS::DynamoDB::Table"
+            Properties:
+                AttributeDefinitions:
+                    - AttributeName: id
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: id
+                      KeyType: HASH
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                TableName: ${self:provider.environment.SAVED_TABLE}
+        UsersTable:
+            Type: "AWS::DynamoDB::Table"
+            Properties:
+                AttributeDefinitions:
+                    - AttributeName: id
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: id
+                      KeyType: HASH
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                TableName: ${self:provider.environment.USERS_TABLE}
